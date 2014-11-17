@@ -68,7 +68,7 @@ public class DeploymentOverlayDeploymentUnitProcessor implements DeploymentUnitP
         final DeploymentUnit deploymentUnit = phaseContext.getDeploymentUnit();
         final ResourceRoot deploymentRoot = deploymentUnit.getAttachment(Attachments.DEPLOYMENT_ROOT);
 
-        Map<String, MountedDeploymentOverlay> mounts = new HashMap<String, MountedDeploymentOverlay>();
+        final Map<String, MountedDeploymentOverlay> mounts = new HashMap<String, MountedDeploymentOverlay>();
         deploymentUnit.putAttachment(Attachments.DEPLOYMENT_OVERLAY_LOCATIONS, mounts);
 
         //resource roots require special handling
@@ -81,7 +81,7 @@ public class DeploymentOverlayDeploymentUnitProcessor implements DeploymentUnitP
                 resourceRootMap.put(root.getRoot().getPathNameRelativeTo(deploymentRoot.getRoot()), root);
             }
         }
-        DeploymentOverlayIndex overlays = deploymentUnit.getAttachment(Attachments.DEPLOYMENT_OVERLAY_INDEX);
+        final DeploymentOverlayIndex overlays = deploymentUnit.getAttachment(Attachments.DEPLOYMENT_OVERLAY_INDEX);
         if(overlays == null) {
             return;
         }
@@ -102,26 +102,30 @@ public class DeploymentOverlayDeploymentUnitProcessor implements DeploymentUnitP
                         VirtualFile content = contentRepository.getContent(entry.getValue());
                         if (exploded) {
                             //for exploded deployments we simply copy the file
-
-                            copyFile(content.getPhysicalFile(), mountPoint.getPhysicalFile());
-
+                            final File mountPointFile = mountPoint.getPhysicalFile();
+                            if(mountPointFile.exists()){
+                                copyFile(content.getPhysicalFile(), mountPoint.getPhysicalFile());
+                            } else {
+                                VirtualFile parent = mountPoint.getParent();
+                                final List<VirtualFile> createParents = new ArrayList<VirtualFile>();
+                                while (!parent.exists()) {
+                                    createParents.add(parent);
+                                    parent = parent.getParent();
+                                }
+                                if(parent.isDirectory()){
+                                    copyFile(content.getPhysicalFile(), mountPoint.getPhysicalFile());
+                                } else {
+                                    createVirtualOverlay(deploymentUnit,path,mountPoint,content,createParents,mounts);
+                                }
+                            }
                         } else {
                             VirtualFile parent = mountPoint.getParent();
-                            List<VirtualFile> createParents = new ArrayList<VirtualFile>();
+                            final List<VirtualFile> createParents = new ArrayList<VirtualFile>();
                             while (!parent.exists()) {
                                 createParents.add(parent);
                                 parent = parent.getParent();
                             }
-                            Collections.reverse(createParents);
-                            for(VirtualFile file : createParents) {
-                                Closeable closable = VFS.mountTemp(file, TempFileProviderService.provider());
-                                deploymentUnit.addToAttachmentList(MOUNTED_FILES, closable);
-                            }
-                            Closeable handle = VFS.mountReal(content.getPhysicalFile(), mountPoint);
-                            MountedDeploymentOverlay mounted = new MountedDeploymentOverlay(handle, content.getPhysicalFile(),  mountPoint, TempFileProviderService.provider());
-                            deploymentUnit.addToAttachmentList(MOUNTED_FILES, mounted);
-                            mounts.put(path, mounted);
-
+                            createVirtualOverlay(deploymentUnit,path,mountPoint,content,createParents,mounts);
                         }
                     }
                 } catch (IOException e) {
@@ -167,11 +171,25 @@ public class DeploymentOverlayDeploymentUnitProcessor implements DeploymentUnitP
         }
     }
 
-
     public static void close(Closeable closeable) {
         try {
             closeable.close();
         } catch (IOException ignore) {
         }
+    }
+
+    private void createVirtualOverlay(final DeploymentUnit deploymentUnit, final String path, final VirtualFile mountPoint,
+            final VirtualFile content, final List<VirtualFile> createParents, final Map<String, MountedDeploymentOverlay> mounts)
+            throws IOException {
+        Collections.reverse(createParents);
+        for (VirtualFile file : createParents) {
+            Closeable closable = VFS.mountTemp(file, TempFileProviderService.provider());
+            deploymentUnit.addToAttachmentList(MOUNTED_FILES, closable);
+        }
+        Closeable handle = VFS.mountReal(content.getPhysicalFile(), mountPoint);
+        MountedDeploymentOverlay mounted = new MountedDeploymentOverlay(handle, content.getPhysicalFile(), mountPoint,
+                TempFileProviderService.provider());
+        deploymentUnit.addToAttachmentList(MOUNTED_FILES, mounted);
+        mounts.put(path, mounted);
     }
 }
