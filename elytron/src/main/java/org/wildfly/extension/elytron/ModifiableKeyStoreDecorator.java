@@ -182,7 +182,7 @@ class ModifiableKeyStoreDecorator extends DelegatingResourceDefinition {
                 return;
             }
 
-            result.get(ElytronDescriptionConstants.ALIAS).set(name);
+            result.get(ElytronDescriptionConstants.NAME).set(name);
             result.get(ElytronDescriptionConstants.ENTRY_TYPE).set(ReadAliasHandler.getEntryType(keyStore, name));
 
             Date creationDate = keyStore.getCreationDate(name);
