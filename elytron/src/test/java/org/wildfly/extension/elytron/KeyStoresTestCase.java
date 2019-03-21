@@ -433,7 +433,7 @@ public class KeyStoresTestCase extends AbstractSubsystemTest {
         operation.get(ClientConstants.OPERATION_HEADERS).get("allow-resource-service-restart").set(Boolean.TRUE);
         operation.get(ClientConstants.OP_ADDR).add("subsystem","elytron").add("key-store", "ModifiedKeyStore");
         operation.get(ClientConstants.OP).set(ClientConstants.ADD);
-        operation.get(ElytronDescriptionConstants.PATH).set(resources + "/firefly-copy.keystore");
+        operation.get(ElytronDescriptionConstants.PATH).set("firefly-copy.keystore");
         operation.get(ElytronDescriptionConstants.TYPE).set("JKS");
         operation.get(CredentialReference.CREDENTIAL_REFERENCE).get(CredentialReference.CLEAR_TEXT).set("Elytron");
         assertSuccess(services.executeOperation(operation));
@@ -643,7 +643,7 @@ public class KeyStoresTestCase extends AbstractSubsystemTest {
             extensions.add(getExtension(true, "KeyUsage", "digitalSignature"));
             operation.get(ElytronDescriptionConstants.EXTENSIONS).set(extensions);
             operation.get(CredentialReference.CREDENTIAL_REFERENCE).get(CredentialReference.CLEAR_TEXT).set(KEY_PASSWORD);
-            operation.get(ElytronDescriptionConstants.PATH).set(resources + csrFileName);
+            operation.get(ElytronDescriptionConstants.PATH).set(csrFileName);
             assertSuccess(services.executeOperation(operation));
 
             assertTrue(csrFile.exists());
@@ -695,8 +695,7 @@ public class KeyStoresTestCase extends AbstractSubsystemTest {
             operation.get(ClientConstants.OP).set(ElytronDescriptionConstants.IMPORT_CERTIFICATE);
             operation.get(ElytronDescriptionConstants.ALIAS).set("ssmith");
             operation.get(CredentialReference.CREDENTIAL_REFERENCE).get(CredentialReference.CLEAR_TEXT).set(KEY_PASSWORD);
-            Path resources = Paths.get(KeyStoresTestCase.class.getResource(".").toURI());
-            operation.get(ElytronDescriptionConstants.PATH).set(resources + replyFileName);
+            operation.get(ElytronDescriptionConstants.PATH).set(replyFileName);
             assertSuccess(services.executeOperation(operation));
 
             alias = readAlias("ssmith");
@@ -747,8 +746,7 @@ public class KeyStoresTestCase extends AbstractSubsystemTest {
             operation.get(ClientConstants.OP).set(ElytronDescriptionConstants.IMPORT_CERTIFICATE);
             operation.get(ElytronDescriptionConstants.ALIAS).set("ssmith");
             operation.get(CredentialReference.CREDENTIAL_REFERENCE).get(CredentialReference.CLEAR_TEXT).set(KEY_PASSWORD);
-            Path resources = Paths.get(KeyStoresTestCase.class.getResource(".").toURI());
-            operation.get(ElytronDescriptionConstants.PATH).set(resources + replyFileName);
+            operation.get(ElytronDescriptionConstants.PATH).set(replyFileName);
             operation.get(ElytronDescriptionConstants.VALIDATE).set(validate);
             operation.get(ElytronDescriptionConstants.TRUST_CACERTS).set(true);
 
@@ -794,8 +792,7 @@ public class KeyStoresTestCase extends AbstractSubsystemTest {
             operation.get(ClientConstants.OP_ADDR).add("subsystem", "elytron").add("key-store", KEYSTORE_NAME);
             operation.get(ClientConstants.OP).set(ElytronDescriptionConstants.IMPORT_CERTIFICATE);
             operation.get(ElytronDescriptionConstants.ALIAS).set("intermediateCA");
-            Path resources = Paths.get(KeyStoresTestCase.class.getResource(".").toURI());
-            operation.get(ElytronDescriptionConstants.PATH).set(resources + replyFileName);
+            operation.get(ElytronDescriptionConstants.PATH).set(replyFileName);
             operation.get(ElytronDescriptionConstants.TRUST_CACERTS).set(true);
             assertSuccess(services.executeOperation(operation));
             assertEquals(numAliasesBefore + 1, readAliases().size());
@@ -838,8 +835,7 @@ public class KeyStoresTestCase extends AbstractSubsystemTest {
             operation.get(ClientConstants.OP_ADDR).add("subsystem", "elytron").add("key-store", KEYSTORE_NAME);
             operation.get(ClientConstants.OP).set(ElytronDescriptionConstants.IMPORT_CERTIFICATE);
             operation.get(ElytronDescriptionConstants.ALIAS).set("anotherCA");
-            Path resources = Paths.get(KeyStoresTestCase.class.getResource(".").toURI());
-            operation.get(ElytronDescriptionConstants.PATH).set(resources + replyFileName);
+            operation.get(ElytronDescriptionConstants.PATH).set(replyFileName);
             operation.get(ElytronDescriptionConstants.VALIDATE).set(validate);
             operation.get(ElytronDescriptionConstants.TRUST_CACERTS).set(true);
 
@@ -880,7 +876,7 @@ public class KeyStoresTestCase extends AbstractSubsystemTest {
             operation.get(ClientConstants.OP_ADDR).add("subsystem", "elytron").add("key-store", KEYSTORE_NAME);
             operation.get(ClientConstants.OP).set(ElytronDescriptionConstants.EXPORT_CERTIFICATE);
             operation.get(ElytronDescriptionConstants.ALIAS).set("ssmith");
-            operation.get(ElytronDescriptionConstants.PATH).set(resources + certificateFileName);
+            operation.get(ElytronDescriptionConstants.PATH).set(certificateFileName);
             assertSuccess(services.executeOperation(operation));
 
             assertTrue(certificateFile.exists());
@@ -909,7 +905,7 @@ public class KeyStoresTestCase extends AbstractSubsystemTest {
             operation.get(ClientConstants.OP_ADDR).add("subsystem", "elytron").add("key-store", KEYSTORE_NAME);
             operation.get(ClientConstants.OP).set(ElytronDescriptionConstants.EXPORT_CERTIFICATE);
             operation.get(ElytronDescriptionConstants.ALIAS).set("ssmith");
-            operation.get(ElytronDescriptionConstants.PATH).set(resources + certificateFileName);
+            operation.get(ElytronDescriptionConstants.PATH).set(certificateFileName);
             operation.get(ElytronDescriptionConstants.PEM).set(true);
             assertSuccess(services.executeOperation(operation));
 
@@ -1233,7 +1229,7 @@ public class KeyStoresTestCase extends AbstractSubsystemTest {
         operation.get(ClientConstants.OPERATION_HEADERS).get("allow-resource-service-restart").set(Boolean.TRUE);
         operation.get(ClientConstants.OP_ADDR).add("subsystem","elytron").add("key-store", keyStoreName);
         operation.get(ClientConstants.OP).set(ClientConstants.ADD);
-        operation.get(ElytronDescriptionConstants.PATH).set(resources + "/test-copy.keystore");
+        operation.get(ElytronDescriptionConstants.PATH).set("test-copy.keystore");
         operation.get(ElytronDescriptionConstants.TYPE).set("JKS");
         operation.get(CredentialReference.CREDENTIAL_REFERENCE).get(CredentialReference.CLEAR_TEXT).set(keyStorePassword);
         assertSuccess(services.executeOperation(operation));
@@ -1251,7 +1247,7 @@ public class KeyStoresTestCase extends AbstractSubsystemTest {
         operation.get(ClientConstants.OPERATION_HEADERS).get("allow-resource-service-restart").set(Boolean.TRUE);
         operation.get(ClientConstants.OP_ADDR).add("subsystem","elytron").add("key-store", KEYSTORE_NAME);
         operation.get(ClientConstants.OP).set(ClientConstants.ADD);
-        operation.get(ElytronDescriptionConstants.PATH).set(resources + "/test-copy.keystore");
+        operation.get(ElytronDescriptionConstants.PATH).set("test-copy.keystore");
         operation.get(ElytronDescriptionConstants.TYPE).set("JKS");
         operation.get(CredentialReference.CREDENTIAL_REFERENCE).get(CredentialReference.CLEAR_TEXT).set("Elytron");
         assertSuccess(services.executeOperation(operation));
@@ -1303,7 +1299,7 @@ public class KeyStoresTestCase extends AbstractSubsystemTest {
         operation.get(ClientConstants.OPERATION_HEADERS).get("allow-resource-service-restart").set(Boolean.TRUE);
         operation.get(ClientConstants.OP_ADDR).add("subsystem","elytron").add("key-store", KEYSTORE_NAME);
         operation.get(ClientConstants.OP).set(ClientConstants.ADD);
-        operation.get(ElytronDescriptionConstants.PATH).set(resources + nonExistentFileName);
+        operation.get(ElytronDescriptionConstants.PATH).set(nonExistentFileName);
         operation.get(ElytronDescriptionConstants.TYPE).set("JKS");
         operation.get(CredentialReference.CREDENTIAL_REFERENCE).get(CredentialReference.CLEAR_TEXT).set("Elytron");
         if (required) {

@@ -24,7 +24,6 @@ import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.AccessController;
@@ -363,13 +362,12 @@ public class TlsTestCase extends AbstractSubsystemTest {
 
     @Test
     public void testReloadTrustManager() throws Throwable {
-        Path resources = Paths.get(TlsTestCase.class.getResource(".").toURI());
         Files.copy(Paths.get(TRUST_FILE.toString()), Paths.get(WORKING_DIRECTORY_LOCATION + INIT_TEST_FILE), StandardCopyOption.REPLACE_EXISTING);
 
         ModelNode operation = new ModelNode();
         operation.get(ClientConstants.OP_ADDR).add("subsystem", "elytron").add(ElytronDescriptionConstants.KEY_STORE, INIT_TEST_TRUSTSTORE);
         operation.get(ClientConstants.OP).set(ClientConstants.ADD);
-        operation.get(ElytronDescriptionConstants.PATH).set(resources + INIT_TEST_FILE);
+        operation.get(ElytronDescriptionConstants.PATH).set(INIT_TEST_FILE);
         operation.get(ElytronDescriptionConstants.TYPE).set("JKS");
         operation.get(CredentialReference.CREDENTIAL_REFERENCE).get(CredentialReference.CLEAR_TEXT).set("Elytron");
         Assert.assertEquals(services.executeOperation(operation).get(OUTCOME).asString(), SUCCESS);

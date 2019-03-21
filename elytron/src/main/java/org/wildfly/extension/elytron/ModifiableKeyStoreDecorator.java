@@ -85,8 +85,19 @@ class ModifiableKeyStoreDecorator extends DelegatingResourceDefinition {
 
     static class ReadAliasesHandler extends ElytronRuntimeOnlyHandler {
 
+        static final SimpleAttributeDefinition RECURSIVE = new SimpleAttributeDefinitionBuilder(ElytronDescriptionConstants.RECURSIVE, ModelType.BOOLEAN, false)
+                .setAllowExpression(false)
+                .setDefaultValue(new ModelNode(false))
+                .build();
+
+        static final SimpleAttributeDefinition VERBOSE = new SimpleAttributeDefinitionBuilder(ElytronDescriptionConstants.VERBOSE, ModelType.BOOLEAN, false)
+                .setAllowExpression(false)
+                .setDefaultValue(new ModelNode(false))
+                .build();
+
         static void register(ManagementResourceRegistration resourceRegistration, ResourceDescriptionResolver descriptionResolver) {
             SimpleOperationDefinition READ_ALIASES = new SimpleOperationDefinitionBuilder(ElytronDescriptionConstants.READ_ALIASES, descriptionResolver)
+                    .setParameters(RECURSIVE,VERBOSE)
                     .setReadOnly()
                     .setRuntimeOnly()
                     .build();
@@ -115,9 +126,14 @@ class ModifiableKeyStoreDecorator extends DelegatingResourceDefinition {
                 .setAllowExpression(false)
                 .build();
 
+        static final SimpleAttributeDefinition VERBOSE = new SimpleAttributeDefinitionBuilder(ElytronDescriptionConstants.VERBOSE, ModelType.BOOLEAN, false)
+                .setAllowExpression(false)
+                .setDefaultValue(new ModelNode(false))
+                .build();
+
         static void register(ManagementResourceRegistration resourceRegistration, ResourceDescriptionResolver descriptionResolver) {
             SimpleOperationDefinition READ_ALIAS = new SimpleOperationDefinitionBuilder(ElytronDescriptionConstants.READ_ALIAS, descriptionResolver)
-                    .setParameters(ALIAS)
+                    .setParameters(ALIAS, VERBOSE)
                     .setReadOnly()
                     .setRuntimeOnly()
                     .build();
@@ -126,7 +142,8 @@ class ModifiableKeyStoreDecorator extends DelegatingResourceDefinition {
 
         @Override
         protected void executeRuntimeStep(OperationContext context, ModelNode operation) throws OperationFailedException {
-            String alias = ALIAS.resolveModelAttribute(context, operation).asString();
+            final String alias = ALIAS.resolveModelAttribute(context, operation).asString();
+            final boolean verbose = VERBOSE.resolveModelAttribute(context, operation).asBoolean();
             KeyStore keyStore = getKeyStore(context);
 
             try {
@@ -149,10 +166,10 @@ class ModifiableKeyStoreDecorator extends DelegatingResourceDefinition {
                 if (chain == null) {
                     Certificate cert = keyStore.getCertificate(alias);
                     if (cert != null) {
-                        writeCertificate(result.get(ElytronDescriptionConstants.CERTIFICATE), cert);
+                        writeCertificate(result.get(ElytronDescriptionConstants.CERTIFICATE), cert, verbose);
                     }
                 } else {
-                    writeCertificates(result.get(ElytronDescriptionConstants.CERTIFICATE_CHAIN), chain);
+                    writeCertificates(result.get(ElytronDescriptionConstants.CERTIFICATE_CHAIN), chain, verbose);
                 }
             } catch (KeyStoreException | NoSuchAlgorithmException | CertificateEncodingException e) {
                 throw new OperationFailedException(e);
