@@ -18,6 +18,7 @@ package org.wildfly.test.integration.elytron.sasl.mgmt;
 
 import static org.jboss.as.test.integration.security.common.SecurityTestConstants.KEYSTORE_PASSWORD;
 
+import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ import org.wildfly.test.security.common.elytron.SimpleSecurityDomain;
 import org.wildfly.test.security.common.elytron.SimpleSecurityDomain.SecurityDomainRealm;
 import org.wildfly.test.security.common.elytron.SimpleServerSslContext;
 import org.wildfly.test.security.common.elytron.SimpleTrustManager;
+import org.wildfly.test.security.common.kerberos.AbstractKrb5ConfServerSetupTask;
 import org.wildfly.test.security.common.kerberos.KerberosSystemPropertiesSetupTask;
 import org.wildfly.test.security.common.other.AccessIdentityConfigurator;
 import org.wildfly.test.security.common.other.SimpleMgmtNativeInterface;
@@ -129,9 +131,9 @@ public class KerberosNativeMgmtSaslTestCase extends AbstractKerberosMgmtSaslTest
             final SimpleKeyStore.Builder ksCommon = SimpleKeyStore.builder().withType("JKS")
                     .withCredentialReference(credentialReference);
             elements.add(ksCommon.withName("server-keystore")
-                    .withPath(CliPath.builder().withPath(SERVER_KEYSTORE_FILE.getAbsolutePath()).build()).build());
+                    .withPath(CliPath.builder().withPath(WORK_DIR_GSSAPI.getName() + File.separator + SERVER_KEYSTORE_FILE.getName()).build()).build());
             elements.add(ksCommon.withName("server-truststore")
-                    .withPath(CliPath.builder().withPath(SERVER_TRUSTSTORE_FILE.getAbsolutePath()).build()).build());
+                    .withPath(CliPath.builder().withPath(WORK_DIR_GSSAPI.getName() + File.separator + SERVER_TRUSTSTORE_FILE.getName()).build()).build());
 
             // Key and Trust Managers
             elements.add(SimpleKeyManager.builder().withName("server-keymanager").withCredentialReference(credentialReference)
@@ -156,7 +158,7 @@ public class KerberosNativeMgmtSaslTestCase extends AbstractKerberosMgmtSaslTest
             elements.add(KerberosSecurityFactory.builder().withName(NAME)
                     .withPrincipal(Krb5ConfServerSetupTask.REMOTE_PRINCIPAL)
                     .withCliPath(
-                            CliPath.builder().withPath(Krb5ConfServerSetupTask.REMOTE_KEYTAB_FILE.getAbsolutePath()).build())
+                            CliPath.builder().withPath(AbstractKrb5ConfServerSetupTask.WORK_DIR_KRB.getName() + File.separator + Krb5ConfServerSetupTask.REMOTE_KEYTAB_FILE.getName()).build())
                     .build());
 
             // SASL Authentication

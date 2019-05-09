@@ -31,7 +31,9 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.PrivilegedAction;
@@ -125,10 +127,12 @@ public abstract class AbstractKerberosMgmtSaslTestBase {
     protected static final String LDAP_URL = "ldap://" + NetworkUtils.formatPossibleIpv6Address(
             CoreUtils.getCannonicalHost(TestSuiteEnvironment.getSecondaryTestAddress(false))) + ":" + LDAP_PORT;
 
+    protected static final Path path = FileSystems.getDefault().getPath(TestSuiteEnvironment.getJBossHome() + File.separator + "standalone" + File.separator + "configuration", "");
+    protected static final String WORK_DIR_PREFIX = "gssapi-";
     protected static final File WORK_DIR_GSSAPI;
     static {
         try {
-            WORK_DIR_GSSAPI = Files.createTempDirectory("gssapi-").toFile();
+            WORK_DIR_GSSAPI = Files.createTempDirectory(path,WORK_DIR_PREFIX).toFile();
         } catch (IOException e) {
             throw new RuntimeException("Unable to create temporary folder", e);
         }
@@ -389,7 +393,6 @@ public abstract class AbstractKerberosMgmtSaslTestBase {
             FileUtils.deleteQuietly(WORK_DIR_GSSAPI);
             WORK_DIR_GSSAPI.mkdir();
             CoreUtils.createKeyMaterial(WORK_DIR_GSSAPI);
-
             sslFactory = new SSLContextBuilder().setClientMode(true).setTrustManager(getTrustManager()).build();
         }
 
@@ -404,11 +407,11 @@ public abstract class AbstractKerberosMgmtSaslTestBase {
      * Task which generates krb5.conf and keytab file(s).
      */
     public static class Krb5ConfServerSetupTask extends AbstractKrb5ConfServerSetupTask {
-        public static final File HNELSON_KEYTAB_FILE = new File(WORK_DIR, "hnelson.keytab");
-        public static final File JDUKE_KEYTAB_FILE = new File(WORK_DIR, "jduke.keytab");
+        public static final File HNELSON_KEYTAB_FILE = new File(WORK_DIR_KRB, "hnelson.keytab");
+        public static final File JDUKE_KEYTAB_FILE = new File(WORK_DIR_KRB, "jduke.keytab");
         public static final String REMOTE_PRINCIPAL = "remote/"
                 + CoreUtils.getCannonicalHost(TestSuiteEnvironment.getSecondaryTestAddress(false)) + "@JBOSS.ORG";
-        public static final File REMOTE_KEYTAB_FILE = new File(WORK_DIR, "remote.keytab");
+        public static final File REMOTE_KEYTAB_FILE = new File(WORK_DIR_KRB, "remote.keytab");
 
         @Override
         protected List<UserForKeyTab> kerberosUsers() {

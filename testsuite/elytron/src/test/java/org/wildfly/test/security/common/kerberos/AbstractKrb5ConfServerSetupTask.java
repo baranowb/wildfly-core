@@ -26,7 +26,9 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -61,20 +63,20 @@ import org.wildfly.core.testrunner.ServerSetupTask;
 public abstract class AbstractKrb5ConfServerSetupTask implements ServerSetupTask {
 
     private static Logger LOGGER = Logger.getLogger(AbstractKrb5ConfServerSetupTask.class);
-
-    protected static final File WORK_DIR;
+    protected static final Path path = FileSystems.getDefault().getPath(TestSuiteEnvironment.getJBossHome() + File.separator + "standalone" + File.separator + "configuration", "");
+    public static final File WORK_DIR_KRB;
     static {
         try {
-            WORK_DIR = Files.createTempDirectory("krbconf-").toFile();
+            WORK_DIR_KRB = Files.createTempDirectory(path,"krbconf-").toFile();
         } catch (IOException e) {
             throw new RuntimeException("Unable to create temporary folder", e);
         }
     }
 
     private static final String KRB5_CONF = "krb5.conf";
-    private static final File KRB5_CONF_FILE = new File(WORK_DIR, KRB5_CONF);
+    private static final File KRB5_CONF_FILE = new File(WORK_DIR_KRB, KRB5_CONF);
 
-    public static final File HTTP_KEYTAB_FILE = new File(WORK_DIR, "http.keytab");
+    public static final File HTTP_KEYTAB_FILE = new File(WORK_DIR_KRB, "http.keytab");
 
     private String origKrb5Conf;
     private String origKrbDebug;
@@ -92,9 +94,9 @@ public abstract class AbstractKrb5ConfServerSetupTask implements ServerSetupTask
      *      java.lang.String)
      */
     public void setup(ManagementClient managementClient) throws Exception {
-        LOGGER.trace("(Re)Creating workdir: " + WORK_DIR.getAbsolutePath());
-        FileUtils.deleteDirectory(WORK_DIR);
-        WORK_DIR.mkdirs();
+        LOGGER.trace("(Re)Creating workdir: " + WORK_DIR_KRB.getAbsolutePath());
+        FileUtils.deleteDirectory(WORK_DIR_KRB);
+        WORK_DIR_KRB.mkdirs();
         final String cannonicalHost = NetworkUtils.formatPossibleIpv6Address(CoreUtils.getCannonicalHost(TestSuiteEnvironment.getServerAddress()));
         final Map<String, String> map = new HashMap<String, String>();
         map.put("hostname", cannonicalHost);
@@ -130,7 +132,7 @@ public abstract class AbstractKrb5ConfServerSetupTask implements ServerSetupTask
      *      java.lang.String)
      */
     public void tearDown(ManagementClient managementClient) throws Exception {
-        FileUtils.deleteDirectory(WORK_DIR);
+        FileUtils.deleteDirectory(WORK_DIR_KRB);
         CoreUtils.setSystemProperty("java.security.krb5.conf", origKrb5Conf);
         CoreUtils.setSystemProperty("sun.security.krb5.debug", origKrbDebug);
         CoreUtils.setSystemProperty("com.ibm.security.jgss.debug", origIbmJGSSDebug);

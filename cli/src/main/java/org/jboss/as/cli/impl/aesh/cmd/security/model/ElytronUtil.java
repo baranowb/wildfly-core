@@ -292,7 +292,8 @@ public abstract class ElytronUtil {
         builder.addNode(Util.SUBSYSTEM, Util.ELYTRON);
         builder.addNode(Util.KEY_STORE, trustStore.getName());
         builder.getModelNode().get(Util.ALIAS).set(alias);
-        builder.getModelNode().get(Util.PATH).set(trustedCertificate.getAbsolutePath());
+        builder.getModelNode().get(Util.RELATIVE_TO).set(Util.JBOSS_SERVER_CONFIG_DIR);
+        builder.getModelNode().get(Util.PATH).set(trustedCertificate.getName());
         builder.getModelNode().get(Util.TRUST_CACERTS).set(trust);
         builder.getModelNode().get(Util.VALIDATE).set(validate);
         return builder.buildRequest();
