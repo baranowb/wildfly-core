@@ -248,7 +248,7 @@ public abstract class AbstractEnableSSLCommand implements Command<CLICommandInvo
 
         if (trustedCertificatePath != null) {
             checkKeyStoreOperationsSupported(ctx, OPT_TRUSTED_CERTIFICATE_PATH);
-            if (!trustedCertificatePath.exists()) {
+            if (trustedCertificatePath.isAbsolute() && !trustedCertificatePath.exists()) {
                 throw new CommandException("The client certificate path " + trustedCertificatePath + " doesn't exist");
             }
             if (trustStoreName != null) {

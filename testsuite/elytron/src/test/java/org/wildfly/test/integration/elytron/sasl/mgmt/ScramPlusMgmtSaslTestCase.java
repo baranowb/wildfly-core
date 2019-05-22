@@ -34,7 +34,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.ConnectException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +51,7 @@ import javax.security.sasl.SaslException;
 import org.apache.commons.io.FileUtils;
 import org.jboss.as.test.integration.security.common.CoreUtils;
 import org.jboss.as.test.integration.security.common.SecurityTestConstants;
+import org.jboss.as.test.shared.TestSuiteEnvironment;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.wildfly.core.testrunner.ManagementClient;
@@ -105,11 +108,12 @@ public class ScramPlusMgmtSaslTestCase {
     protected static final String USERNAME = "guest";
     protected static final String PASSWORD = "guest-pwd";
     protected static final String USERNAME_CLIENT = "client";
-
+    protected static final String WORK_DIR_PREFIX = "scramplus-";
+    protected static final Path path = FileSystems.getDefault().getPath(TestSuiteEnvironment.getJBossHome() + File.separator + "standalone" + File.separator + "configuration", "");
     private static final File WORK_DIR;
     static {
         try {
-            WORK_DIR = Files.createTempDirectory("scramplus-").toFile();
+            WORK_DIR = Files.createTempDirectory(path,WORK_DIR_PREFIX).toFile();
         } catch (IOException e) {
             throw new RuntimeException("Unable to create temporary folder", e);
         }
@@ -368,9 +372,9 @@ public class ScramPlusMgmtSaslTestCase {
             final SimpleKeyStore.Builder ksCommon = SimpleKeyStore.builder().withType("JKS")
                     .withCredentialReference(credentialReference);
             elements.add(ksCommon.withName("server-keystore")
-                    .withPath(CliPath.builder().withPath(SERVER_KEYSTORE_FILE.getAbsolutePath()).build()).build());
+                    .withPath(CliPath.builder().withPath(WORK_DIR.getName() + File.separator + SERVER_KEYSTORE_FILE.getName()).build()).build());
             elements.add(ksCommon.withName("server-truststore")
-                    .withPath(CliPath.builder().withPath(SERVER_TRUSTSTORE_FILE.getAbsolutePath()).build()).build());
+                    .withPath(CliPath.builder().withPath(WORK_DIR.getName() + File.separator + SERVER_TRUSTSTORE_FILE.getName()).build()).build());
 
             // Key and Trust Managers
             elements.add(SimpleKeyManager.builder().withName("server-keymanager").withCredentialReference(credentialReference)

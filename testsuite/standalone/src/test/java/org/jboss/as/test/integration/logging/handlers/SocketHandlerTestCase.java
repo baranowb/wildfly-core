@@ -19,14 +19,12 @@
 
 package org.jboss.as.test.integration.logging.handlers;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UncheckedIOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
@@ -86,7 +84,9 @@ public class SocketHandlerTestCase extends AbstractLoggingTestCase {
     private static final String SOCKET_BINDING_NAME = "log-server";
     private static final String FORMATTER_NAME = "json";
     private static final ModelNode LOGGER_ADDRESS = SUBSYSTEM_ADDRESS.append("logger", LoggingServiceActivator.LOGGER.getName()).toModelNode();
-    private static final Path TEMP_DIR = createTempDir();
+    private static final File WF_CONFIG_DIR = createWFConfigurationDirHandle();
+    private static final File CLIENT_TRUST_STORE = new File(WF_CONFIG_DIR, "client-trust-store.jks");
+    private static final File SERVER_TRUST_STORE = new File(WF_CONFIG_DIR, "server-cert-store.jks");
 
     // TLS Configuration
     private static final String TEST_PASSWORD = "changeit";
@@ -105,20 +105,13 @@ public class SocketHandlerTestCase extends AbstractLoggingTestCase {
     public static void tearDown() throws Exception {
         undeploy(DEPLOYMENT_NAME);
         // Clear the temporary directory and delete it
-        Files.walkFileTree(TEMP_DIR, new SimpleFileVisitor<Path>() {
-            @Override
-            public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
-                Files.delete(file);
-                return FileVisitResult.CONTINUE;
-            }
+        if(CLIENT_TRUST_STORE.exists()) {
+            CLIENT_TRUST_STORE.delete();
+        }
 
-            @Override
-            public FileVisitResult postVisitDirectory(final Path dir, final IOException exc) throws IOException {
-                Files.delete(dir);
-                return FileVisitResult.CONTINUE;
-            }
-        });
-        Files.deleteIfExists(TEMP_DIR);
+        if(SERVER_TRUST_STORE.exists()) {
+            SERVER_TRUST_STORE.delete();
+        }
     }
 
     @After
@@ -156,14 +149,14 @@ public class SocketHandlerTestCase extends AbstractLoggingTestCase {
         final KeyStore serverKeyStore = loadKeyStore();
 
         createKeyStoreTrustStore(serverKeyStore, clientTrustStore);
-        final Path clientTrustFile = createTemporaryKeyStoreFile(clientTrustStore, "client-trust-store.jks");
-        final Path serverCertFile = createTemporaryKeyStoreFile(serverKeyStore, "server-cert-store.jks");
+        final File clientTrustFile = createTemporaryKeyStoreFile(clientTrustStore, CLIENT_TRUST_STORE);
+        final File serverCertFile = createTemporaryKeyStoreFile(serverKeyStore, SERVER_TRUST_STORE);
         // Create a TCP server and start it
-        try (JsonLogServer server = JsonLogServer.createTlsServer(PORT, serverCertFile, TEST_PASSWORD)) {
+        try (JsonLogServer server = JsonLogServer.createTlsServer(PORT, FileSystems.getDefault().getPath(serverCertFile.getParent(),serverCertFile.getName()), TEST_PASSWORD)) {
             server.start(DFT_TIMEOUT);
 
             // Add the socket handler and test all levels
-            final ModelNode socketHandlerAddress = addSocketHandler("test-log-server", null, "SSL_TCP", clientTrustFile);
+            final ModelNode socketHandlerAddress = addSocketHandler("test-log-server", null, "SSL_TCP", FileSystems.getDefault().getPath(clientTrustFile.getParent(),clientTrustFile.getName()));
             checkLevelsLogged(server, EnumSet.allOf(Logger.Level.class), "Test SSL_TCP all levels.");
 
             // Change to only allowing INFO and higher messages
@@ -341,7 +334,7 @@ public class SocketHandlerTestCase extends AbstractLoggingTestCase {
             final ModelNode keyStoreAddress = Operations.createAddress("subsystem", "elytron", "key-store", "log-test-ks");
             resourcesToRemove.addFirst(keyStoreAddress);
             final ModelNode keyStoreAddOp = Operations.createAddOperation(keyStoreAddress);
-            keyStoreAddOp.get("path").set(keyStore.toAbsolutePath().toString());
+            keyStoreAddOp.get("path").set(keyStore.toAbsolutePath().getFileName().toString());
             keyStoreAddOp.get("type").set("JKS");
             final ModelNode creds = keyStoreAddOp.get("credential-reference").setEmptyObject();
             creds.get("clear-text").set(TEST_PASSWORD);
@@ -431,20 +424,16 @@ public class SocketHandlerTestCase extends AbstractLoggingTestCase {
         return ks;
     }
 
-    private static Path createTemporaryKeyStoreFile(final KeyStore keyStore, final String fileName) throws Exception {
-        final Path file = TEMP_DIR.resolve(fileName);
-        try (OutputStream fos = Files.newOutputStream(file)) {
+    private static File createTemporaryKeyStoreFile(final KeyStore keyStore, final File fileName) throws Exception {
+        try (OutputStream fos = new FileOutputStream(fileName)) {
             keyStore.store(fos, KEYSTORE_CREATION_PASSWORD);
         }
-        return file;
+        return fileName;
     }
 
-    private static Path createTempDir() {
-        try {
-            return Files.createTempDirectory("wf-test");
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    private static File createWFConfigurationDirHandle() {
+        return new File(TestSuiteEnvironment.getJBossHome() + File.separator
+                + "standalone" + File.separator + "configuration");
     }
 
     public static class ConfigureSubsystem implements ServerSetupTask {

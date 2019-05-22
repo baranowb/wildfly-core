@@ -126,8 +126,10 @@ public class SNICombinedWithALPNTestCase {
         @Override
         public void setup(ManagementClient managementClient) throws Exception {
 
-            hostNameKeystore = File.createTempFile("test", ".keystore");
-            ipKeystore = File.createTempFile("test", ".keystore");
+            File root = new File(TestSuiteEnvironment.getJBossHome() + File.separator
+                    + "standalone" + File.separator + "configuration");
+            hostNameKeystore = File.createTempFile("test", ".keystore", root);
+            ipKeystore = File.createTempFile("test", ".keystore", root);
             generateFileKeyStore(hostNameKeystore, "localhost");
             generateFileKeyStore(ipKeystore, "127.0.0.1");
 
@@ -136,13 +138,13 @@ public class SNICombinedWithALPNTestCase {
 
             ModelNode modelNode = createAddOperation(createAddress(HOST_KEY_STORE));
             modelNode.get("type").set("jks");
-            modelNode.get("path").set(hostNameKeystore.getAbsolutePath());
+            modelNode.get("path").set(hostNameKeystore.getName());
             modelNode.get("credential-reference").set(credential);
             managementClient.executeForResult(modelNode);
 
             modelNode = createAddOperation(createAddress(IP_KEY_STORE));
             modelNode.get("type").set("jks");
-            modelNode.get("path").set(ipKeystore.getAbsolutePath());
+            modelNode.get("path").set(ipKeystore.getName());
             modelNode.get("credential-reference").set(credential);
             managementClient.executeForResult(modelNode);
 

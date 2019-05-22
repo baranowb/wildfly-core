@@ -227,7 +227,7 @@ public abstract class SSLSecurityBuilder implements SecurityCommand.FailureConsu
                     @Override
                     public String stepFailedDescription() {
                         return "Importing certificate "
-                                + trustedCertificate.getAbsolutePath()
+                                + trustedCertificate
                                 + " in trust-store " + newTrustStoreName;
                     }
                 });

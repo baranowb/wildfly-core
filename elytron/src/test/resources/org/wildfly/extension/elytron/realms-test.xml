@@ -6,7 +6,7 @@
     <security-realms>
 
         <properties-realm name="HashedPropertyRealm">
-            <users-properties path="target/test-classes/org/wildfly/extension/elytron/users-hashed.properties" digest-realm-name="Hashed" />
+            <users-properties path="users-hashed.properties" digest-realm-name="Hashed" />
         </properties-realm>
 
         <properties-realm name="ClearPropertyRealm" groups-attribute="groupAttr">

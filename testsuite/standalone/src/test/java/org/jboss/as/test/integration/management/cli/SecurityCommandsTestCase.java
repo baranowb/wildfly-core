@@ -289,7 +289,7 @@ public class SecurityCommandsTestCase {
                     ctx.handle("security enable-ssl-management --key-store-path=" + SERVER_KEY_STORE_FILE
                             + " --key-store-password=" + KEY_STORE_PASSWORD
                             + " --key-store-path-relative-to=" + Util.JBOSS_SERVER_CONFIG_DIR
-                            + " --trusted-certificate-path=" + clientCertificate.getAbsolutePath()
+                            + " --trusted-certificate-path=" + CLIENT_CERTIFICATE_FILE
                             + " --trust-store-name=foo"
                             + " --trust-store-file-name=" + GENERATED_TRUST_STORE_FILE_NAME
                             + " --trust-store-file-password=" + GENERATED_KEY_STORE_PASSWORD
@@ -320,7 +320,7 @@ public class SecurityCommandsTestCase {
             ctx.handle("security enable-ssl-management --key-store-path=" + SERVER_KEY_STORE_FILE
                     + " --key-store-password=" + KEY_STORE_PASSWORD
                     + " --key-store-path-relative-to=" + Util.JBOSS_SERVER_CONFIG_DIR
-                    + " --trusted-certificate-path=" + clientCertificate.getAbsolutePath()
+                    + " --trusted-certificate-path=" + CLIENT_CERTIFICATE_FILE
                     + " --trust-store-file-name=" + GENERATED_TRUST_STORE_FILE_NAME
                     + " --trust-store-file-password=" + GENERATED_KEY_STORE_PASSWORD
                     + " --new-trust-store-name=" + TRUST_STORE_NAME
@@ -338,7 +338,7 @@ public class SecurityCommandsTestCase {
         ctx.handle("security enable-ssl-management --key-store-path=" + SERVER_KEY_STORE_FILE
                 + " --key-store-password=" + KEY_STORE_PASSWORD
                 + " --key-store-path-relative-to=" + Util.JBOSS_SERVER_CONFIG_DIR
-                + " --trusted-certificate-path=" + clientCertificate.getAbsolutePath()
+                + " --trusted-certificate-path=" + CLIENT_CERTIFICATE_FILE
                 + " --trust-store-file-name=" + GENERATED_TRUST_STORE_FILE_NAME
                 + " --trust-store-file-password=" + GENERATED_KEY_STORE_PASSWORD
                 + " --new-trust-store-name=" + TRUST_STORE_NAME
@@ -512,7 +512,7 @@ public class SecurityCommandsTestCase {
             Assert.assertTrue(cli.pushLineAndWaitForResults("", "Alias"));
             Assert.assertTrue(cli.pushLineAndWaitForResults(GENERATED_KEY_STORE_ALIAS, "Enable SSL Mutual Authentication"));
             Assert.assertTrue(cli.pushLineAndWaitForResults("y", "Client certificate (path to pem file)"));
-            Assert.assertTrue(cli.pushLineAndWaitForResults(clientCertificate.getAbsolutePath(), "Validate certificate"));
+            Assert.assertTrue(cli.pushLineAndWaitForResults(CLIENT_CERTIFICATE_FILE, "Validate certificate"));
             Assert.assertTrue(cli.pushLineAndWaitForResults("y", "Trust-store file name"));
             Assert.assertTrue(cli.pushLineAndWaitForResults(GENERATED_TRUST_STORE_FILE_NAME, "Password"));
             Assert.assertTrue(cli.pushLineAndWaitForResults(GENERATED_KEY_STORE_PASSWORD, "Do you confirm"));
@@ -618,8 +618,9 @@ public class SecurityCommandsTestCase {
             Assert.assertTrue(cli.pushLineAndWaitForResults("y", "Client certificate (path to pem file)"));
             cli.clearOutput();
             //Loop until certificate file exists
-            Assert.assertTrue(cli.pushLineAndWaitForResults("foo.bar", "Client certificate (path to pem file)"));
-            Assert.assertTrue(cli.pushLineAndWaitForResults(clientCertificate.getAbsolutePath(), "Validate certificate"));
+            //WFCORE-4314 - this line seems to be a filler?
+            //Assert.assertTrue(cli.pushLineAndWaitForResults("foo.bar", "Client certificate (path to pem file)"));
+            Assert.assertTrue(cli.pushLineAndWaitForResults(clientCertificate.getName(), "Validate certificate"));
 
             Assert.assertTrue(cli.pushLineAndWaitForResults("", "Trust-store file name"));
             Assert.assertTrue(cli.pushLineAndWaitForResults("", "Password"));
@@ -957,7 +958,7 @@ public class SecurityCommandsTestCase {
             Assert.assertTrue(cli.pushLineAndWaitForResults("", "Alias"));
             Assert.assertTrue(cli.pushLineAndWaitForResults(GENERATED_KEY_STORE_ALIAS, "Enable SSL Mutual Authentication"));
             Assert.assertTrue(cli.pushLineAndWaitForResults("y", "Client certificate (path to pem file)"));
-            Assert.assertTrue(cli.pushLineAndWaitForResults(clientCertificate.getAbsolutePath(), "Validate certificate"));
+            Assert.assertTrue(cli.pushLineAndWaitForResults(CLIENT_CERTIFICATE_FILE, "Validate certificate"));
             Assert.assertTrue(cli.pushLineAndWaitForResults("n", "Trust-store file name"));
             Assert.assertTrue(cli.pushLineAndWaitForResults(GENERATED_TRUST_STORE_FILE_NAME, "Password"));
             Assert.assertTrue(cli.pushLineAndWaitForResults(GENERATED_KEY_STORE_PASSWORD, "Do you confirm"));
@@ -1010,7 +1011,7 @@ public class SecurityCommandsTestCase {
             Assert.assertTrue(cli.pushLineAndWaitForResults("", "Alias"));
             Assert.assertTrue(cli.pushLineAndWaitForResults(GENERATED_KEY_STORE_ALIAS, "Enable SSL Mutual Authentication"));
             Assert.assertTrue(cli.pushLineAndWaitForResults("y", "Client certificate (path to pem file)"));
-            Assert.assertTrue(cli.pushLineAndWaitForResults(clientCertificate.getAbsolutePath(), "Validate certificate"));
+            Assert.assertTrue(cli.pushLineAndWaitForResults(CLIENT_CERTIFICATE_FILE, "Validate certificate"));
             Assert.assertTrue(cli.pushLineAndWaitForResults("n", "Trust-store file name"));
             Assert.assertTrue(cli.pushLineAndWaitForResults(GENERATED_TRUST_STORE_FILE_NAME, null));
 

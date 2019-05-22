@@ -223,7 +223,8 @@ public class InteractiveSecurityBuilder extends SSLSecurityBuilder {
                 while (clientCertificate == null || clientCertificate.length() == 0) {
                     clientCertificate = commandInvocation.inputLine(new Prompt("Client certificate (path to pem file): "), completer);
                     if (clientCertificate != null && clientCertificate.length() > 0) {
-                        if (!new File(clientCertificate).exists()) {
+                        final File clientCertificateFile = new File(clientCertificate);
+                        if (clientCertificateFile.isAbsolute() && !clientCertificateFile.exists()) {
                             clientCertificate = null;
                             ctx.printLine("The specified file doesn't exist");
                         }
