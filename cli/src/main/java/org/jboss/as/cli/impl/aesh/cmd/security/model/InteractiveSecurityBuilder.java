@@ -222,13 +222,13 @@ public class InteractiveSecurityBuilder extends SSLSecurityBuilder {
                 PromptFileCompleter completer = new PromptFileCompleter(commandInvocation.getConfiguration().getAeshContext());
                 while (clientCertificate == null || clientCertificate.length() == 0) {
                     clientCertificate = commandInvocation.inputLine(new Prompt("Client certificate (path to pem file): "), completer);
-                    if (clientCertificate != null && clientCertificate.length() > 0) {
-                        final File clientCertificateFile = new File(clientCertificate);
-                        if (clientCertificateFile.isAbsolute() && !clientCertificateFile.exists()) {
-                            clientCertificate = null;
-                            ctx.printLine("The specified file doesn't exist");
-                        }
-                    }
+//                    if (clientCertificate != null && clientCertificate.length() > 0) {
+//                        final File clientCertificateFile = new File(clientCertificate);
+//                        if (clientCertificateFile.isAbsolute() && !clientCertificateFile.exists()) {
+//                            clientCertificate = null;
+//                            ctx.printLine("The specified file doesn't exist");
+//                        }
+//                    }
                 }
 
                 // Prompt for validity.
